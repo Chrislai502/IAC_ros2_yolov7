@@ -23,6 +23,7 @@
 
 
 #include "ros2_yolov7/Yolov7.h"
+#include "ros2_yolov7/camera_intrinsics.hpp"
 
 
 static const char* cocolabels[] = {
@@ -154,23 +155,23 @@ std::vector<cv::Mat> Yolov7::preProcess(std::vector<cv::Mat> &cv_img) {
             cv::undistort(cv_img[i], undistorted, camera_intrinsics[i].cameraMatrix, camera_intrinsics[i].distortionCoefficients);
         }
 
-        float scale_x = mInputDim.d[3] / (float)cv_img[i].cols;
-        float scale_y = mInputDim.d[2] / (float)cv_img[i].rows;
+        float scale_x = mInputDim.d[3] / (float)undistorted.cols;
+        float scale_y = mInputDim.d[2] / (float)undistorted.rows;
         float scale = std::min(scale_x, scale_y);
         float i2d[6], d2i[6];
 
         // resize the image, the src img and the dst img have the same center
-        i2d[0] = scale;  i2d[1] = 0;  i2d[2] = (-scale * cv_img[i].cols + mInputDim.d[3] + scale  - 1) * 0.5;
-        i2d[3] = 0;  i2d[4] = scale;  i2d[5] = (-scale * cv_img[i].rows + mInputDim.d[2] + scale - 1) * 0.5;
+        i2d[0] = scale;  i2d[1] = 0;  i2d[2] = (-scale * undistorted.cols + mInputDim.d[3] + scale  - 1) * 0.5;
+        i2d[3] = 0;  i2d[4] = scale;  i2d[5] = (-scale * undistorted.rows + mInputDim.d[2] + scale - 1) * 0.5;
 
         cv::Mat m2x3_i2d(2, 3, CV_32F, i2d);  // image to dst(network), 2x3 matrix
         cv::Mat m2x3_d2i(2, 3, CV_32F, d2i);  // dst to image, 2x3 matrix
         cv::invertAffineTransform(m2x3_i2d, m2x3_d2i);
         std::vector<float> d2i_1{d2i[0],d2i[1],d2i[2],d2i[3],d2i[4],d2i[5]};
         this->md2i.push_back(d2i_1);
-        
+
         cv::Mat input_image;
-        cv::cvtColor(cv_img[i], input_image, cv::COLOR_BGR2RGB);
+        cv::cvtColor(undistorted, input_image, cv::COLOR_BGR2RGB);
         cv::warpAffine(input_image, input_image, m2x3_i2d, cv::Size(mInputDim.d[3], mInputDim.d[2]), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar::all(114));
         input_image.convertTo(input_image, CV_32FC3, 1.0f/255.0f, 0);
         cv::Mat nchwMat;

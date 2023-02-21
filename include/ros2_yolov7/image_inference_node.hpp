@@ -45,6 +45,8 @@
 #include "vision_msgs/msg/detection2_d_array.hpp"
 #include <message_filters/pass_through.h>
 #include <message_filters/subscriber.h>
+// Add latest_time.h from the below link into /opt/ros/galactic/message_filters/include/message_filters/sync_policies/
+// https://docs.ros.org/en/ros2_packages/rolling/api/message_filters/generated/program_listing_file__tmp_ws_src_message_filters_include_message_filters_sync_policies_latest_time.h.html
 #include <message_filters/sync_policies/latest_time.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/synchronizer.h>

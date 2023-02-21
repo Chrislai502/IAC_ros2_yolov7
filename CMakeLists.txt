@@ -48,6 +48,7 @@ if(DEFINED ENV{CONDA_PREFIX})
   list(APPEND CMAKE_IGNORE_PATH ${h5_ignore_path})
 endif()
 
+find_package(message_filters REQUIRED)
 find_package(ament_cmake_auto REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(CUDA REQUIRED)
